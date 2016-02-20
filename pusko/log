@@ -1,0 +1,21 @@
+In file included from lab2.cpp:2:0:
+system/Plate.cpp: In member function ‘void Plate::addComponent(int, int, Component*)’:
+system/Plate.cpp:44:93: error: no matching function for call to ‘AddableComponent::AddableComponent(Node*&, Node*&, Component*&)’
+     AddableComponent* addComponent = new AddableComponent(nodes[in] , nodes[out] , component)
+                                                                                             ^
+system/Plate.cpp:44:93: note: candidates are:
+In file included from system/Plate.cpp:1:0,
+                 from lab2.cpp:2:
+system/Node.cpp:15:3: note: AddableComponent::AddableComponent(Component*, Node*, Node*)
+   AddableComponent(Component* component , Node* first , Node* second){
+   ^
+system/Node.cpp:15:3: note:   no known conversion for argument 1 from ‘Node*’ to ‘Component*’
+system/Node.cpp:9:7: note: AddableComponent::AddableComponent(const AddableComponent&)
+ class AddableComponent : public Component{
+       ^
+system/Node.cpp:9:7: note:   candidate expects 1 argument, 3 provided
+lab2.cpp: At global scope:
+lab2.cpp:28:1: error: expected declaration before ‘}’ token
+ }
+ ^
+make: *** [all] Error 1
