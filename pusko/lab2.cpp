@@ -115,7 +115,7 @@ void* action(void* v_arg){
 			for(int i = 0 , it = arg -> width * countThreads ; i < countCorner ; i++ , it++)
 				corner[i] = matrix + it * (count + 1) + arg -> width * countThreads;
 
-			for(int i = countThreads - 1 , delta = 0 ; i >= 0 ; i--){
+			for(int i = 0 , delta = 0 ; i < countThreads ; i++){
 				int widthCorner = args[i].localPlate -> getCountNodes() - 1 - args[i].width;
 				for(int j = 0 ; j < widthCorner ; j++){
 					for(int k = 0 ; k < widthCorner ; k++)
