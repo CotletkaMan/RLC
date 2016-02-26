@@ -1,28 +1,62 @@
 #include "Node.cpp"
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
+using namespace std;
 class Plate{
 	private:
-		int X;
-		int Y;
 		int countNodes;
-		double* voltage;
+		double** voltage;
 		Node** nodes;
 		int* inOrder;
-		std::vector<Component*> components;
+		vector<Component*> components;
 
 	public:
-		Plate(int x , int y , double* voltage){
-			this -> X = x;
-			this -> Y = y;
+		Plate(int countNodes , double** voltage){
 			this -> voltage = voltage;
-			countNodes = (X * Y) + 1;
+			this -> countNodes = countNodes;
 			nodes = new Node*[countNodes];
 			inOrder = new int[countNodes];
 			for(int i = 0 ; i < countNodes ; i++){
 				inOrder[i] = i;
-				nodes[i] = new Node(inOrder[i] , &voltage[0]);
+				nodes[i] = new Node(&inOrder[i] , voltage);
+			}
+		}
+
+		Plate(Node** p_nodes , int p_length){
+			countNodes = p_length + 1;
+			voltage = new double*[countNodes];
+			nodes = new Node*[countNodes];
+			inOrder = new int[countNodes];
+			vector<Node*> sorted;
+
+			voltage[0] = new double[1];
+			for(int i = 0 ; i < p_length ; i++){
+				sorted.push_back(p_nodes[i]);
+				inOrder[i] = i;
+				nodes[i] = new Node(&inOrder[i] , voltage);
+			}
+			sorted.push_back(nodes[0]);
+			nodes[p_length] = new Node(&inOrder[p_length] , voltage);
+			inOrder[p_length] = p_length;
+
+
+			sort(sorted.begin() , sorted.end() , Node::comparate);
+			int i = 1;
+
+			for(vector<Node*>::iterator it = sorted.begin() + 1 ; it != sorted.end() ; it++ , i++){	
+				voltage[i] = (*it) -> getState();
+				vector<AddableComponent*> addComponents = (*it) -> getComponents();
+				for(vector<AddableComponent*>::iterator ad = addComponents.begin() ; ad != addComponents.end() ; ad++){
+					int out = ((*ad) -> getFirstNode() -> getNumNode() == 0) ? 0 : find(sorted.begin() , sorted.end() , (*ad) -> getFirstNode()) - sorted.begin();
+					int in = ((*ad) -> getSecondNode() -> getNumNode() == 0) ? 0 : find(sorted.begin() , sorted.end() , (*ad) -> getSecondNode()) - sorted.begin();
+					if(in <= p_length && out <= p_length){
+						AddableComponent* component = new AddableComponent((*ad) -> getComponent() , nodes[out] , nodes[in]);
+						nodes[in] -> addComponent(component);
+						nodes[out] -> addComponent(component);
+					}
+				}
 			}
 		}
 
@@ -48,13 +82,29 @@ class Plate{
 			}
 		}
 
-		void createStiffMatrix(double **mtr , int length , int y){
-			for(int i = 0 ; i < y ; i++){
-				nodes[i] -> createStiffMatrix(&mtr[i] , length , y);
-			}
+		double* createStiffMatrix(double* matrix){
+			for(int i = countNodes - 1 ; i > 0 ; i--)
+				nodes[i] -> createStiffMatrix(&matrix[(inOrder[i] - 1) * (countNodes)] , countNodes);
+			return &matrix[1];
+		}
+
+		int getCountNodes(){
+			return countNodes;
 		}
 
 		Node** getNodes(){
 			return nodes;
+		}
+
+		int* getOrder(){
+			return inOrder;
+		}
+
+		int* setOrder(int* order){
+			inOrder = order;
+		}
+
+		double** getVoltage(){
+			return voltage;
 		}
 };

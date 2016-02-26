@@ -1,0 +1,4 @@
+splot 'gnu.sh' index i u 1:2:3 with lines title '#'.i
+i=i + 1
+pause 0.1
+if(i < n) reread;
